@@ -1,13 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const appUrl = process.env.NEXT_PUBLIC_URL;
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(): Promise<NextResponse> {
   try {
     // Parse the request body
-    const body = await req.json();
-    
-    // In a real app, you would validate the Frame message here
+    // const body = await req.json();
     
     // Create a frame response HTML
     const frameHtml = `
@@ -38,7 +36,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 }
 
 // Add a GET handler for easier testing
-export async function GET(req: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   const frameHtml = `
     <!DOCTYPE html>
     <html>
