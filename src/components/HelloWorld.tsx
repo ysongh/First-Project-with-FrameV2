@@ -7,10 +7,13 @@ import sdk, {
 
 import { createStore } from "mipd";
 
+import { Button } from "./ui/Button";
+
 export default function Demo(
   { title }: { title?: string } = { title: "Frames v2 Demo" }
 ) {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [count, setCount] = useState(0);
   const [context, setContext] = useState<Context.FrameContext>();
 
   useEffect(() => {
@@ -59,7 +62,10 @@ export default function Demo(
     >
       <div className="w-[300px] mx-auto py-2 px-2">
         <h1 className="text-2xl font-bold text-center mt-10 mb-4">Hello World {title}</h1>
-        <p className="text-xl  text-center mt-10 mb-4">Hello World, again</p>
+        <p className="text-3xl text-center mt-10 mb-4">{count}</p>
+        <Button onClick={() => setCount(count + 1)}>
+          Add by 1
+        </Button>
       </div>
     </div>
   );
