@@ -14,17 +14,18 @@ export default function Bingo(
   { title }: { title?: string } = { title: "Bingo" }
 ) {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [context, setContext] = useState<Context.FrameContext>();
+
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
   const [lastDrawnNumber, setLastDrawnNumber] = useState<number | null>(null);
   const [gameActive, setGameActive] = useState<boolean>(false);
-  const [hasBingo, setHasBingo] = useState<boolean>(false);
-  const [context, setContext] = useState<Context.FrameContext>();
+  const [gameResult, setGameResult] = useState<'none' | 'win' | 'invalid'>('none');
 
   const startNewGame = () => {
     setDrawnNumbers([]);
     setLastDrawnNumber(null);
     setGameActive(true);
-    setHasBingo(false);
+    setGameResult('none');
   };
 
   const drawNumber = () => {
@@ -44,9 +45,35 @@ export default function Bingo(
     setDrawnNumbers(prev => [...prev, newDrawnNumber]);
   };
 
-  const declareBingo = () => {
-    setHasBingo(true);
-    setGameActive(false);
+  const verifyBingo = (markedPositions: [number, number][]) => {
+    // Extract numbers from marked positions
+    const markedNumbers: number[] = [];
+    let hasFreeSpace = false;
+    
+    for (const [col, row] of markedPositions) {
+      // Check if it's the free space
+      if (col === 2 && row === 2) {
+        hasFreeSpace = true;
+      } else {
+        // Get the card number from BingoCard component
+        const cardRef = document.getElementById(`bingo-cell-${col}-${row}`);
+        if (cardRef && cardRef.dataset.number) {
+          markedNumbers.push(parseInt(cardRef.dataset.number));
+        }
+      }
+    }
+    
+    // Check if all marked numbers have been drawn
+    const isValid = markedNumbers.every(num => drawnNumbers.includes(num));
+    
+    if (isValid) {
+      setGameResult('win');
+      setGameActive(false);
+    } else {
+      setGameResult('invalid');
+      // Reset back to 'none' after 3 seconds
+      setTimeout(() => setGameResult('none'), 3000);
+    }
   };
 
   useEffect(() => {
@@ -111,8 +138,8 @@ export default function Bingo(
             <BingoCard 
               drawnNumbers={drawnNumbers} 
               gameActive={gameActive}
-              declareBingo={declareBingo}
-              hasBingo={hasBingo}
+              verifyBingo={verifyBingo}
+              gameResult={gameResult}
             />
           </div>
         </div>

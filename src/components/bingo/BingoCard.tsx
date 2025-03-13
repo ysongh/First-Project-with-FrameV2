@@ -5,24 +5,35 @@ import React, { useState, useEffect } from 'react';
 interface BingoCardProps {
   drawnNumbers: number[];
   gameActive: boolean;
-  declareBingo: () => void;
-  hasBingo: boolean;
+  verifyBingo: (markedPositions: [number, number][]) => void;
+  gameResult: 'none' | 'win' | 'invalid';
 }
 
 export const BingoCard: React.FC<BingoCardProps> = ({ 
   drawnNumbers, 
   gameActive, 
-  declareBingo,
-  hasBingo
+  verifyBingo,
+  gameResult
 }) => {
   // Bingo card structure with 5x5 grid (B:1-15, I:16-30, N:31-45, G:46-60, O:61-75)
   // The middle cell (index 12) is a free space
   const [cardNumbers, setCardNumbers] = useState<number[][]>([]);
+  const [markedPositions, setMarkedPositions] = useState<[number, number][]>([]);
   
   // Initialize bingo card with random numbers
   useEffect(() => {
     generateNewCard();
+    // Mark the free space by default
+    setMarkedPositions([[2, 2]]);
   }, []);
+
+  // Reset marked positions when starting a new game (except free space)
+  useEffect(() => {
+    if (gameActive && gameResult === 'none' && drawnNumbers.length === 0) {
+      generateNewCard();
+      setMarkedPositions([[2, 2]]);
+    }
+  }, [gameActive, gameResult, drawnNumbers]);
 
   const generateNewCard = () => {
     const newCard: number[][] = [];
@@ -47,24 +58,39 @@ export const BingoCard: React.FC<BingoCardProps> = ({
     setCardNumbers(newCard);
   };
 
-  const isNumberMarked = (num: number): boolean => {
-    return drawnNumbers.includes(num);
-  };
-
   // Function to check if middle cell (free space)
   const isFreeSpace = (col: number, row: number): boolean => {
     return col === 2 && row === 2;
   };
 
-  // Check if the user has a bingo
-  const checkForBingo = (): boolean => {
-    if (!gameActive) return false;
+  // Function to check if a position is marked
+  const isMarked = (col: number, row: number): boolean => {
+    return markedPositions.some(([c, r]) => c === col && r === row);
+  };
+
+  // Toggle marking a position
+  const toggleMark = (col: number, row: number) => {
+    if (!gameActive || gameResult === 'win') return;
     
+    // Don't allow unmarking the free space
+    if (isFreeSpace(col, row)) return;
+    
+    if (isMarked(col, row)) {
+      // Unmark the position
+      setMarkedPositions(prev => prev.filter(([c, r]) => !(c === col && r === row)));
+    } else {
+      // Mark the position
+      setMarkedPositions(prev => [...prev, [col, row]]);
+    }
+  };
+
+  // Check if a row, column, or diagonal is completely marked
+  const hasCompleteLine = (): boolean => {
     // Check rows
     for (let row = 0; row < 5; row++) {
       let rowComplete = true;
       for (let col = 0; col < 5; col++) {
-        if (!isFreeSpace(col, row) && !isNumberMarked(cardNumbers[col][row])) {
+        if (!isMarked(col, row)) {
           rowComplete = false;
           break;
         }
@@ -76,7 +102,7 @@ export const BingoCard: React.FC<BingoCardProps> = ({
     for (let col = 0; col < 5; col++) {
       let colComplete = true;
       for (let row = 0; row < 5; row++) {
-        if (!isFreeSpace(col, row) && !isNumberMarked(cardNumbers[col][row])) {
+        if (!isMarked(col, row)) {
           colComplete = false;
           break;
         }
@@ -89,10 +115,10 @@ export const BingoCard: React.FC<BingoCardProps> = ({
     let diag2Complete = true;
     
     for (let i = 0; i < 5; i++) {
-      if (!isFreeSpace(i, i) && !isNumberMarked(cardNumbers[i][i])) {
+      if (!isMarked(i, i)) {
         diag1Complete = false;
       }
-      if (!isFreeSpace(4-i, i) && !isNumberMarked(cardNumbers[4-i][i])) {
+      if (!isMarked(4-i, i)) {
         diag2Complete = false;
       }
     }
@@ -117,37 +143,49 @@ export const BingoCard: React.FC<BingoCardProps> = ({
         
         {/* Bingo card numbers */}
         {Array.from({ length: 5 }).map((_, row) => (
-          <>
+          <React.Fragment key={`row-${row}`}>
             {Array.from({ length: 5 }).map((_, col) => {
               const isFree = isFreeSpace(col, row);
-              const isMarked = isFree || (cardNumbers[col]?.[row] && isNumberMarked(cardNumbers[col][row]));
+              const marked = isMarked(col, row);
+              const number = isFree ? null : cardNumbers[col]?.[row];
+              const isDrawn = number ? drawnNumbers.includes(number) : false;
               
               return (
                 <div 
+                  id={`bingo-cell-${col}-${row}`}
                   key={`cell-${col}-${row}`}
+                  data-number={number}
+                  onClick={() => toggleMark(col, row)}
                   className={`aspect-square flex items-center justify-center text-lg font-medium border ${
-                    isMarked 
+                    marked 
                       ? 'bg-red-500 text-white border-red-600' 
-                      : 'bg-white border-gray-300'
-                  }`}
+                      : isDrawn
+                        ? 'bg-yellow-100 border-yellow-300'
+                        : 'bg-white border-gray-300'
+                  } ${gameActive && !isFree ? 'cursor-pointer hover:bg-gray-100' : ''}`}
                 >
-                  {isFree ? 'FREE' : cardNumbers[col]?.[row]}
+                  {isFree ? 'FREE' : number}
                 </div>
               );
             })}
-          </>
+          </React.Fragment>
         ))}
+      </div>
+      
+      <div className="text-center mb-4">
+        <p className="text-sm mb-2">Click on numbers to mark them when you find matches</p>
+        <p className="text-sm mb-2">Numbers that have been drawn are highlighted in yellow</p>
       </div>
       
       <button
         onClick={() => {
-          if (checkForBingo()) {
-            declareBingo();
+          if (hasCompleteLine()) {
+            verifyBingo(markedPositions);
           }
         }}
-        disabled={!gameActive || hasBingo}
+        disabled={!gameActive || !hasCompleteLine()}
         className={`px-4 py-2 rounded-md font-bold ${
-          gameActive && !hasBingo
+          gameActive && hasCompleteLine()
             ? 'bg-red-600 hover:bg-red-700 text-white'
             : 'bg-gray-300 text-gray-600 cursor-not-allowed'
         }`}
@@ -155,9 +193,15 @@ export const BingoCard: React.FC<BingoCardProps> = ({
         Call BINGO!
       </button>
       
-      {hasBingo && (
+      {gameResult === 'win' && (
         <div className="mt-4 text-xl font-bold text-green-600">
           BINGO! You won!
+        </div>
+      )}
+      
+      {gameResult === 'invalid' && (
+        <div className="mt-4 text-xl font-bold text-red-600">
+          Invalid BINGO! Some marked numbers haven't been drawn.
         </div>
       )}
     </div>
