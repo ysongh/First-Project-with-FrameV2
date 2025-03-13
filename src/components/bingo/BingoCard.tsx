@@ -201,7 +201,7 @@ export const BingoCard: React.FC<BingoCardProps> = ({
       
       {gameResult === 'invalid' && (
         <div className="mt-4 text-xl font-bold text-red-600">
-          Invalid BINGO! Some marked numbers haven't been drawn.
+          Invalid BINGO! Some marked numbers haven&#39;t been drawn.
         </div>
       )}
     </div>

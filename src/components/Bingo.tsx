@@ -48,12 +48,11 @@ export default function Bingo(
   const verifyBingo = (markedPositions: [number, number][]) => {
     // Extract numbers from marked positions
     const markedNumbers: number[] = [];
-    let hasFreeSpace = false;
     
     for (const [col, row] of markedPositions) {
       // Check if it's the free space
       if (col === 2 && row === 2) {
-        hasFreeSpace = true;
+        continue;
       } else {
         // Get the card number from BingoCard component
         const cardRef = document.getElementById(`bingo-cell-${col}-${row}`);
