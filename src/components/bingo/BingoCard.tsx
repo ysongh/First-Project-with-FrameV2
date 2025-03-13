@@ -120,8 +120,7 @@ export const BingoCard: React.FC<BingoCardProps> = ({
           <>
             {Array.from({ length: 5 }).map((_, col) => {
               const isFree = isFreeSpace(col, row);
-              const number = isFree ? 'FREE' : cardNumbers[col]?.[row];
-              const isMarked = isFree || (number && isNumberMarked(number));
+              const isMarked = isFree || (cardNumbers[col]?.[row] && isNumberMarked(cardNumbers[col][row]));
               
               return (
                 <div 
@@ -132,7 +131,7 @@ export const BingoCard: React.FC<BingoCardProps> = ({
                       : 'bg-white border-gray-300'
                   }`}
                 >
-                  {number}
+                  {isFree ? 'FREE' : cardNumbers[col]?.[row]}
                 </div>
               );
             })}
