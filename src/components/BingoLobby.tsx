@@ -6,16 +6,9 @@ import sdk, {
 } from "@farcaster/frame-sdk";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
 import { createStore } from "mipd";
 
-interface Game {
-  id: string;
-  name: string;
-  players: number;
-  status: 'waiting' | 'active' | 'finished';
-  createdAt: string;
-}
+import { gameService, Game } from "~/app/services/apiService";
 
 export default function BingoLobby(
   { title }: { title?: string } = { title: "Bingo Lobby" }
@@ -23,29 +16,7 @@ export default function BingoLobby(
   const router = useRouter();
 
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
-  const [games] = useState<Game[]>([
-    { 
-      id: '1', 
-      name: 'Fun Bingo Night', 
-      players: 3, 
-      status: 'waiting',
-      createdAt: new Date().toISOString() 
-    },
-    { 
-      id: '2', 
-      name: 'Quick Game', 
-      players: 5, 
-      status: 'active',
-      createdAt: new Date(Date.now() - 10 * 60000).toISOString() 
-    },
-    { 
-      id: '3', 
-      name: 'Championship Round', 
-      players: 12, 
-      status: 'active',
-      createdAt: new Date(Date.now() - 30 * 60000).toISOString() 
-    }
-  ]);
+  const [games, setGames] = useState<Game[]>([]);
   const [context, setContext] = useState<Context.FrameContext>();
 
   useEffect(() => {
@@ -79,16 +50,34 @@ export default function BingoLobby(
     }
   }, [isSDKLoaded]);
 
+   // Fetch games from API when component mounts
+   useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const gamesData = await gameService.getGames();
+        setGames(gamesData);
+      } catch (err) {
+        console.error('Error loading games:', err);
+      }
+    };
+
+    fetchGames();
+  }, []);
+
   if (!isSDKLoaded) {
     return <div>Loading...</div>;
   }
 
-  const createNewGame = () => {
-    // In a real app, we would make an API call to create a new game
-    const gameId = Math.floor(Math.random() * 10000).toString();
-    
-    // Navigate to the newly created game
-    router.push(`/game/${gameId}`);
+  const createNewGame = async () => {
+    try {
+      const newGame = await gameService.createGame();
+      if (newGame) {
+        // Navigate to the newly created game
+        router.push(`/game/${newGame.id}`);
+      }
+    } catch (err) {
+      console.error('Error creating new game:', err);
+    }
   };
 
   const getStatusBadge = (status: 'waiting' | 'active' | 'finished') => {
