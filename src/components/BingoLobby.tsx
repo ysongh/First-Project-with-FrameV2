@@ -116,7 +116,7 @@ export default function BingoLobby(
         paddingRight: context?.client.safeAreaInsets?.right ?? 0,
       }}
     >
-      <div className="w-[500px] mx-auto py-2 px-2">
+      <div className="w-[300px] mx-auto py-2 px-2">
         <h1 className="text-2xl font-bold text-center mt-10 mb-4">Bingo Lobby{title}</h1>
         <Link 
           href="/bingo" 
@@ -141,19 +141,16 @@ export default function BingoLobby(
                 <thead>
                   <tr className="bg-gray-50">
                     <th className="py-3 px-4 text-left font-medium text-gray-500 uppercase tracking-wider">Game Name</th>
+                    <th className="py-3 px-4 text-left font-medium text-gray-500 uppercase tracking-wider">Action</th>
                     <th className="py-3 px-4 text-left font-medium text-gray-500 uppercase tracking-wider">Players</th>
                     <th className="py-3 px-4 text-left font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="py-3 px-4 text-left font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                    <th className="py-3 px-4 text-left font-medium text-gray-500 uppercase tracking-wider">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {games.map((game) => (
                     <tr key={game.id} className="hover:bg-gray-50">
                       <td className="py-4 px-4">{game.name}</td>
-                      <td className="py-4 px-4">{game.players}</td>
-                      <td className="py-4 px-4">{getStatusBadge(game.status)}</td>
-                      <td className="py-4 px-4">{formatTime(game.createdAt)}</td>
                       <td className="py-4 px-4">
                         <Link
                           href={`/game/${game.id}`}
@@ -162,6 +159,9 @@ export default function BingoLobby(
                           Join
                         </Link>
                       </td>
+                      <td className="py-4 px-4">{game.players}</td>
+                      <td className="py-4 px-4">{getStatusBadge(game.status)}</td>
+                      <td className="py-4 px-4">{formatTime(game.createdAt)}</td>
                     </tr>
                   ))}
                 </tbody>
