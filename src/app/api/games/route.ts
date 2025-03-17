@@ -59,6 +59,6 @@ export async function POST(request: Request) {
     
     return NextResponse.json(newGame, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create game' }, { status: 400 });
+    return NextResponse.json({ error: 'Failed to create game' + error }, { status: 400 });
   }
 }
