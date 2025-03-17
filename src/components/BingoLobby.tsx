@@ -179,7 +179,7 @@ export default function BingoLobby(
               <li>Join an existing game or create a new one</li>
               <li>Wait for numbers to be called</li>
               <li>Click on matching numbers on your card</li>
-              <li>Call "BINGO" when you get 5 in a row</li>
+              <li>Call &#34;BINGO&#34; when you get 5 in a row</li>
             </ol>
           </div>
         </div>
