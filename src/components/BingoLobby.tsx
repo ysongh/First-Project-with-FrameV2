@@ -73,7 +73,7 @@ export default function BingoLobby(
       const newGame = await gameService.createGame();
       if (newGame) {
         // Navigate to the newly created game
-        router.push(`/game/${newGame.id}`);
+        router.push(`/bingo/game/${newGame.id}`);
       }
     } catch (err) {
       console.error('Error creating new game:', err);
@@ -107,12 +107,6 @@ export default function BingoLobby(
     >
       <div className="w-[300px] mx-auto py-2 px-2">
         <h1 className="text-2xl font-bold text-center mt-10 mb-4">Bingo Lobby{title}</h1>
-        <Link 
-          href="/bingo" 
-          className="block w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors text-center"
-        >
-          Start New Game
-        </Link>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">Available Games</h2>
@@ -142,7 +136,7 @@ export default function BingoLobby(
                       <td className="py-4 px-4">{game.name}</td>
                       <td className="py-4 px-4">
                         <Link
-                          href={`/game/${game.id}`}
+                          href={`/bingo/game/${game.id}`}
                           className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded"
                         >
                           Join
